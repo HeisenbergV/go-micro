@@ -26,10 +26,8 @@ type Options struct {
 
 func newOptions(opt ...Option) Options {
 	opts := Options{
-		Codecs:           make(map[string]codec.NewCodec),
-		Metadata:         map[string]string{},
-		RegisterInterval: DefaultRegisterInterval,
-		RegisterTTL:      DefaultRegisterTTL,
+		Codecs:   make(map[string]codec.NewCodec),
+		Metadata: map[string]string{},
 	}
 
 	for _, o := range opt {

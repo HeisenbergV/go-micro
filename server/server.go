@@ -4,6 +4,7 @@ package server
 import (
 	"context"
 
+	"github.com/google/uuid"
 	"github.com/micro/go-micro/v2/codec"
 )
 
@@ -103,3 +104,13 @@ type Subscriber interface {
 }
 
 type Option func(*Options)
+
+var (
+	DefaultAddress        = ":0"
+	DefaultName           = "go.micro.server"
+	DefaultVersion        = "latest"
+	DefaultId             = uuid.New().String()
+	DefaultServer  Server = newHttpServer()
+	// NewServer creates a new server
+	NewServer func(...Option) Server = newHttpServer
+)

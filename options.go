@@ -35,6 +35,7 @@ func newOptions(opts ...Option) Options {
 	opt := Options{
 		Config:    config.DefaultConfig,
 		Transport: transport.DefaultTransport,
+		Server:    server.DefaultServer,
 		Context:   context.Background(),
 		Signal:    true,
 	}
