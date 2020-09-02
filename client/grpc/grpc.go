@@ -11,14 +11,13 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/micro/go-micro/registry"
 	"github.com/micro/go-micro/v2/broker"
 	"github.com/micro/go-micro/v2/client"
 	"github.com/micro/go-micro/v2/client/selector"
 	raw "github.com/micro/go-micro/v2/codec/bytes"
 	"github.com/micro/go-micro/v2/errors"
 	"github.com/micro/go-micro/v2/metadata"
-	"github.com/micro/go-micro/v2/registry"
-	pnet "github.com/micro/go-micro/v2/util/net"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
@@ -70,30 +69,6 @@ func (g *grpcClient) secure(addr string) grpc.DialOption {
 
 	// other fallback to insecure
 	return grpc.WithInsecure()
-}
-
-func (g *grpcClient) next(request client.Request, opts client.CallOptions) (selector.Next, error) {
-	service, address, _ := pnet.Proxy(request.Service(), opts.Address)
-
-	// return remote address
-	if len(address) > 0 {
-		return func() (*registry.Node, error) {
-			return &registry.Node{
-				Address: address[0],
-			}, nil
-		}, nil
-	}
-
-	// get next nodes from the selector
-	next, err := g.opts.Selector.Select(service, opts.SelectOptions...)
-	if err != nil {
-		if err == selector.ErrNotFound {
-			return nil, errors.InternalServerError("go.micro.client", "service %s: %s", service, err.Error())
-		}
-		return nil, errors.InternalServerError("go.micro.client", "error selecting %s node: %s", service, err.Error())
-	}
-
-	return next, nil
 }
 
 func (g *grpcClient) call(ctx context.Context, node *registry.Node, req client.Request, rsp interface{}, opts client.CallOptions) error {

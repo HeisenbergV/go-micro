@@ -7,7 +7,6 @@ import (
 	"github.com/micro/go-micro/v2/broker"
 	"github.com/micro/go-micro/v2/client/selector"
 	"github.com/micro/go-micro/v2/codec"
-	"github.com/micro/go-micro/v2/registry"
 	"github.com/micro/go-micro/v2/transport"
 )
 
@@ -18,7 +17,6 @@ type Options struct {
 	// Plugged interfaces
 	Broker    broker.Broker
 	Codecs    map[string]codec.NewCodec
-	Registry  registry.Registry
 	Selector  selector.Selector
 	Transport transport.Transport
 
@@ -111,7 +109,6 @@ func NewOptions(options ...Option) Options {
 		PoolTTL:   DefaultPoolTTL,
 		Broker:    broker.DefaultBroker,
 		Selector:  selector.DefaultSelector,
-		Registry:  registry.DefaultRegistry,
 		Transport: transport.DefaultTransport,
 	}
 
@@ -154,15 +151,6 @@ func PoolSize(d int) Option {
 func PoolTTL(d time.Duration) Option {
 	return func(o *Options) {
 		o.PoolTTL = d
-	}
-}
-
-// Registry to find nodes for a given service
-func Registry(r registry.Registry) Option {
-	return func(o *Options) {
-		o.Registry = r
-		// set in the selector
-		o.Selector.Init(selector.Registry(r))
 	}
 }
 
