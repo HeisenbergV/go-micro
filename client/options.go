@@ -42,8 +42,7 @@ type CallOptions struct {
 	// Stream timeout for the stream
 	StreamTimeout time.Duration
 	CallWrappers  []CallWrapper
-
-	Context context.Context
+	Context       context.Context
 }
 
 type PublishOptions struct {

@@ -22,10 +22,7 @@ func newService(opts ...Option) Service {
 	service := new(service)
 	options := newOptions(opts...)
 
-	// service name
-	serviceName := options.Server.Options().Name
-
-	options.Client = wrapper.FromService(serviceName, options.Client)
+	options.Client = wrapper.FromService(options.Server.Options().Name, options.Client)
 	service.opts = options
 
 	return service

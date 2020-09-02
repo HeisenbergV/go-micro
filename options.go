@@ -33,10 +33,7 @@ type Options struct {
 
 func newOptions(opts ...Option) Options {
 	opt := Options{
-		Broker:    broker.DefaultBroker,
 		Config:    config.DefaultConfig,
-		Client:    client.DefaultClient,
-		Server:    server.DefaultServer,
 		Transport: transport.DefaultTransport,
 		Context:   context.Background(),
 		Signal:    true,
