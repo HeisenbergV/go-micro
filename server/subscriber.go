@@ -3,8 +3,6 @@ package server
 import (
 	"fmt"
 	"reflect"
-
-	"github.com/micro/go-micro/v2/registry"
 )
 
 const (
@@ -23,7 +21,6 @@ type subscriber struct {
 	typ        reflect.Type
 	subscriber interface{}
 	handlers   []*handler
-	endpoints  []*registry.Endpoint
 	opts       SubscriberOptions
 }
 
@@ -36,7 +33,6 @@ func newSubscriber(topic string, sub interface{}, opts ...SubscriberOption) Subs
 		o(&options)
 	}
 
-	var endpoints []*registry.Endpoint
 	var handlers []*handler
 
 	if typ := reflect.TypeOf(sub); typ.Kind() == reflect.Func {
@@ -54,14 +50,6 @@ func newSubscriber(topic string, sub interface{}, opts ...SubscriberOption) Subs
 
 		handlers = append(handlers, h)
 
-		endpoints = append(endpoints, &registry.Endpoint{
-			Name:    "Func",
-			Request: extractSubValue(typ),
-			Metadata: map[string]string{
-				"topic":      topic,
-				"subscriber": "true",
-			},
-		})
 	} else {
 		hdlr := reflect.ValueOf(sub)
 		name := reflect.Indirect(hdlr).Type().Name()
@@ -81,15 +69,6 @@ func newSubscriber(topic string, sub interface{}, opts ...SubscriberOption) Subs
 			}
 
 			handlers = append(handlers, h)
-
-			endpoints = append(endpoints, &registry.Endpoint{
-				Name:    name + "." + method.Name,
-				Request: extractSubValue(method.Type),
-				Metadata: map[string]string{
-					"topic":      topic,
-					"subscriber": "true",
-				},
-			})
 		}
 	}
 
@@ -99,7 +78,6 @@ func newSubscriber(topic string, sub interface{}, opts ...SubscriberOption) Subs
 		topic:      topic,
 		subscriber: sub,
 		handlers:   handlers,
-		endpoints:  endpoints,
 		opts:       options,
 	}
 }
@@ -164,10 +142,6 @@ func (s *subscriber) Topic() string {
 
 func (s *subscriber) Subscriber() interface{} {
 	return s.subscriber
-}
-
-func (s *subscriber) Endpoints() []*registry.Endpoint {
-	return s.endpoints
 }
 
 func (s *subscriber) Options() SubscriberOptions {
