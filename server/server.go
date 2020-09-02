@@ -10,7 +10,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/micro/go-micro/v2/codec"
 	"github.com/micro/go-micro/v2/logger"
-	"github.com/micro/go-micro/v2/registry"
 	signalutil "github.com/micro/go-micro/v2/util/signal"
 )
 
@@ -120,7 +119,6 @@ type Stream interface {
 type Handler interface {
 	Name() string
 	Handler() interface{}
-	Endpoints() []*registry.Endpoint
 	Options() HandlerOptions
 }
 
@@ -130,7 +128,6 @@ type Handler interface {
 type Subscriber interface {
 	Topic() string
 	Subscriber() interface{}
-	Endpoints() []*registry.Endpoint
 	Options() SubscriberOptions
 }
 

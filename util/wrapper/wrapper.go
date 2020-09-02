@@ -7,7 +7,6 @@ import (
 
 	"github.com/micro/go-micro/v2/auth"
 	"github.com/micro/go-micro/v2/client"
-	"github.com/micro/go-micro/v2/debug/stats"
 	"github.com/micro/go-micro/v2/debug/trace"
 	"github.com/micro/go-micro/v2/errors"
 	"github.com/micro/go-micro/v2/metadata"
@@ -52,22 +51,6 @@ func FromService(name string, c client.Client) client.Client {
 		metadata.Metadata{
 			HeaderPrefix + "From-Service": name,
 		},
-	}
-}
-
-// HandlerStats wraps a server handler to generate request/error stats
-func HandlerStats(stats stats.Stats) server.HandlerWrapper {
-	// return a handler wrapper
-	return func(h server.HandlerFunc) server.HandlerFunc {
-		// return a function that returns a function
-		return func(ctx context.Context, req server.Request, rsp interface{}) error {
-			// execute the handler
-			err := h(ctx, req, rsp)
-			// record the stats
-			stats.Record(err)
-			// return the error
-			return err
-		}
 	}
 }
 

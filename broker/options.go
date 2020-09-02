@@ -5,7 +5,6 @@ import (
 	"crypto/tls"
 
 	"github.com/micro/go-micro/v2/codec"
-	"github.com/micro/go-micro/v2/registry"
 )
 
 type Options struct {
@@ -18,11 +17,7 @@ type Options struct {
 	ErrorHandler Handler
 
 	TLSConfig *tls.Config
-	// Registry used for clustering
-	Registry registry.Registry
-	// Other options for implementations of the interface
-	// can be stored in a context
-	Context context.Context
+	Context   context.Context
 }
 
 type PublishOptions struct {
@@ -105,12 +100,6 @@ func ErrorHandler(h Handler) Option {
 func Queue(name string) SubscribeOption {
 	return func(o *SubscribeOptions) {
 		o.Queue = name
-	}
-}
-
-func Registry(r registry.Registry) Option {
-	return func(o *Options) {
-		o.Registry = r
 	}
 }
 

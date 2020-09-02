@@ -2,37 +2,22 @@ package micro
 
 import (
 	"context"
-	"time"
 
 	"github.com/micro/cli/v2"
-	"github.com/micro/go-micro/v2/auth"
 	"github.com/micro/go-micro/v2/broker"
 	"github.com/micro/go-micro/v2/client"
-	"github.com/micro/go-micro/v2/client/selector"
 	"github.com/micro/go-micro/v2/config"
-	"github.com/micro/go-micro/v2/config/cmd"
-	"github.com/micro/go-micro/v2/debug/profile"
-	"github.com/micro/go-micro/v2/debug/trace"
-	"github.com/micro/go-micro/v2/registry"
-	"github.com/micro/go-micro/v2/runtime"
 	"github.com/micro/go-micro/v2/server"
-	"github.com/micro/go-micro/v2/store"
 	"github.com/micro/go-micro/v2/transport"
 )
 
 // Options for micro service
 type Options struct {
-	Auth      auth.Auth
 	Broker    broker.Broker
-	Cmd       cmd.Cmd
 	Config    config.Config
 	Client    client.Client
 	Server    server.Server
-	Store     store.Store
-	Registry  registry.Registry
-	Runtime   runtime.Runtime
 	Transport transport.Transport
-	Profile   profile.Profile
 
 	// Before and After funcs
 	BeforeStart []func() error
@@ -49,15 +34,10 @@ type Options struct {
 
 func newOptions(opts ...Option) Options {
 	opt := Options{
-		Auth:      auth.DefaultAuth,
 		Broker:    broker.DefaultBroker,
-		Cmd:       cmd.DefaultCmd,
 		Config:    config.DefaultConfig,
 		Client:    client.DefaultClient,
 		Server:    server.DefaultServer,
-		Store:     store.DefaultStore,
-		Registry:  registry.DefaultRegistry,
-		Runtime:   runtime.DefaultRuntime,
 		Transport: transport.DefaultTransport,
 		Context:   context.Background(),
 		Signal:    true,
@@ -77,12 +57,6 @@ func Broker(b broker.Broker) Option {
 		// Update Client and Server
 		o.Client.Init(client.Broker(b))
 		o.Server.Init(server.Broker(b))
-	}
-}
-
-func Cmd(c cmd.Cmd) Option {
-	return func(o *Options) {
-		o.Cmd = c
 	}
 }
 
@@ -110,13 +84,6 @@ func HandleSignal(b bool) Option {
 	}
 }
 
-// Profile to be used for debug profile
-func Profile(p profile.Profile) Option {
-	return func(o *Options) {
-		o.Profile = p
-	}
-}
-
 // Server to be used for service
 func Server(s server.Server) Option {
 	return func(o *Options) {
@@ -124,52 +91,10 @@ func Server(s server.Server) Option {
 	}
 }
 
-// Store sets the store to use
-func Store(s store.Store) Option {
-	return func(o *Options) {
-		o.Store = s
-	}
-}
-
-// Registry sets the registry for the service
-// and the underlying components
-func Registry(r registry.Registry) Option {
-	return func(o *Options) {
-		o.Registry = r
-		// Update Client and Server
-		o.Client.Init(client.Registry(r))
-		o.Server.Init(server.Registry(r))
-		// Update Broker
-		o.Broker.Init(broker.Registry(r))
-	}
-}
-
-// Tracer sets the tracer for the service
-func Tracer(t trace.Tracer) Option {
-	return func(o *Options) {
-		o.Server.Init(server.Tracer(t))
-	}
-}
-
-// Auth sets the auth for the service
-func Auth(a auth.Auth) Option {
-	return func(o *Options) {
-		o.Auth = a
-		o.Server.Init(server.Auth(a))
-	}
-}
-
 // Config sets the config for the service
 func Config(c config.Config) Option {
 	return func(o *Options) {
 		o.Config = c
-	}
-}
-
-// Selector sets the selector for the service client
-func Selector(s selector.Selector) Option {
-	return func(o *Options) {
-		o.Client.Init(client.Selector(s))
 	}
 }
 
@@ -183,15 +108,6 @@ func Transport(t transport.Transport) Option {
 		o.Server.Init(server.Transport(t))
 	}
 }
-
-// Runtime sets the runtime
-func Runtime(r runtime.Runtime) Option {
-	return func(o *Options) {
-		o.Runtime = r
-	}
-}
-
-// Convenience options
 
 // Address sets the address of the server
 func Address(addr string) Option {
@@ -232,20 +148,6 @@ func Flags(flags ...cli.Flag) Option {
 func Action(a func(*cli.Context) error) Option {
 	return func(o *Options) {
 		o.Cmd.App().Action = a
-	}
-}
-
-// RegisterTTL specifies the TTL to use when registering the service
-func RegisterTTL(t time.Duration) Option {
-	return func(o *Options) {
-		o.Server.Init(server.RegisterTTL(t))
-	}
-}
-
-// RegisterInterval specifies the interval on which to re-register
-func RegisterInterval(t time.Duration) Option {
-	return func(o *Options) {
-		o.Server.Init(server.RegisterInterval(t))
 	}
 }
 

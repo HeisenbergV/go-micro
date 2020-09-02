@@ -6,7 +6,6 @@ import (
 
 	"github.com/micro/go-micro/v2/broker"
 	"github.com/micro/go-micro/v2/client"
-	"github.com/micro/go-micro/v2/registry"
 	"github.com/micro/go-micro/v2/server"
 	"github.com/micro/go-micro/v2/transport"
 )
@@ -15,7 +14,6 @@ type Options struct {
 	Broker    broker.Broker
 	Client    client.Client
 	Server    server.Server
-	Registry  registry.Registry
 	Transport transport.Transport
 
 	// Before and After funcs
@@ -36,7 +34,6 @@ func NewOptions(opts ...Option) Options {
 		Broker:    broker.DefaultBroker,
 		Client:    client.DefaultClient,
 		Server:    server.DefaultServer,
-		Registry:  registry.DefaultRegistry,
 		Transport: transport.DefaultTransport,
 		Context:   context.Background(),
 	}
@@ -75,19 +72,6 @@ func Context(ctx context.Context) Option {
 func Server(s server.Server) Option {
 	return func(o *Options) {
 		o.Server = s
-	}
-}
-
-// Registry sets the registry for the service
-// and the underlying components
-func Registry(r registry.Registry) Option {
-	return func(o *Options) {
-		o.Registry = r
-		// Update Client and Server
-		o.Client.Init(client.Registry(r))
-		o.Server.Init(server.Registry(r))
-		// Update Broker
-		o.Broker.Init(broker.Registry(r))
 	}
 }
 

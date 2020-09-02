@@ -4,22 +4,15 @@ import (
 	"context"
 	"crypto/tls"
 	"sync"
-	"time"
 
-	"github.com/micro/go-micro/v2/auth"
 	"github.com/micro/go-micro/v2/broker"
 	"github.com/micro/go-micro/v2/codec"
-	"github.com/micro/go-micro/v2/debug/trace"
-	"github.com/micro/go-micro/v2/registry"
 	"github.com/micro/go-micro/v2/transport"
 )
 
 type Options struct {
 	Codecs       map[string]codec.NewCodec
 	Broker       broker.Broker
-	Registry     registry.Registry
-	Tracer       trace.Tracer
-	Auth         auth.Auth
 	Transport    transport.Transport
 	Metadata     map[string]string
 	Name         string
@@ -30,14 +23,6 @@ type Options struct {
 	HdlrWrappers []HandlerWrapper
 	SubWrappers  []SubscriberWrapper
 
-	// RegisterCheck runs a check function before registering the service
-	RegisterCheck func(context.Context) error
-	// The register expiry time
-	RegisterTTL time.Duration
-	// The interval on which to register
-	RegisterInterval time.Duration
-
-	// The router for requests
 	Router Router
 
 	// TLSConfig specifies tls.Config for secure serving
@@ -60,24 +45,12 @@ func newOptions(opt ...Option) Options {
 		o(&opts)
 	}
 
-	if opts.Auth == nil {
-		opts.Auth = auth.DefaultAuth
-	}
-
 	if opts.Broker == nil {
 		opts.Broker = broker.DefaultBroker
 	}
 
-	if opts.Registry == nil {
-		opts.Registry = registry.DefaultRegistry
-	}
-
 	if opts.Transport == nil {
 		opts.Transport = transport.DefaultTransport
-	}
-
-	if opts.RegisterCheck == nil {
-		opts.RegisterCheck = DefaultRegisterCheck
 	}
 
 	if len(opts.Address) == 0 {
@@ -157,27 +130,6 @@ func Context(ctx context.Context) Option {
 	}
 }
 
-// Registry used for discovery
-func Registry(r registry.Registry) Option {
-	return func(o *Options) {
-		o.Registry = r
-	}
-}
-
-// Tracer mechanism for distributed tracking
-func Tracer(t trace.Tracer) Option {
-	return func(o *Options) {
-		o.Tracer = t
-	}
-}
-
-// Auth mechanism for role based access control
-func Auth(a auth.Auth) Option {
-	return func(o *Options) {
-		o.Auth = a
-	}
-}
-
 // Transport mechanism for communication e.g http, rabbitmq, etc
 func Transport(t transport.Transport) Option {
 	return func(o *Options) {
@@ -189,27 +141,6 @@ func Transport(t transport.Transport) Option {
 func Metadata(md map[string]string) Option {
 	return func(o *Options) {
 		o.Metadata = md
-	}
-}
-
-// RegisterCheck run func before registry service
-func RegisterCheck(fn func(context.Context) error) Option {
-	return func(o *Options) {
-		o.RegisterCheck = fn
-	}
-}
-
-// Register the service with a TTL
-func RegisterTTL(t time.Duration) Option {
-	return func(o *Options) {
-		o.RegisterTTL = t
-	}
-}
-
-// Register the service with at interval
-func RegisterInterval(t time.Duration) Option {
-	return func(o *Options) {
-		o.RegisterInterval = t
 	}
 }
 
