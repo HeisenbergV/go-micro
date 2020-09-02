@@ -2,7 +2,6 @@ package server
 
 import (
 	"context"
-	"crypto/tls"
 	"sync"
 
 	"github.com/micro/go-micro/v2/broker"
@@ -22,15 +21,7 @@ type Options struct {
 	Version      string
 	HdlrWrappers []HandlerWrapper
 	SubWrappers  []SubscriberWrapper
-
-	Router Router
-
-	// TLSConfig specifies tls.Config for secure serving
-	TLSConfig *tls.Config
-
-	// Other options for implementations of the interface
-	// can be stored in a context
-	Context context.Context
+	Context      context.Context
 }
 
 func newOptions(opt ...Option) Options {
@@ -144,37 +135,6 @@ func Metadata(md map[string]string) Option {
 	}
 }
 
-// TLSConfig specifies a *tls.Config
-func TLSConfig(t *tls.Config) Option {
-	return func(o *Options) {
-		// set the internal tls
-		o.TLSConfig = t
-
-		// set the default transport if one is not
-		// already set. Required for Init call below.
-		if o.Transport == nil {
-			o.Transport = transport.DefaultTransport
-		}
-
-		// set the transport tls
-		o.Transport.Init(
-			transport.Secure(true),
-			transport.TLSConfig(t),
-		)
-	}
-}
-
-// WithRouter sets the request router
-func WithRouter(r Router) Option {
-	return func(o *Options) {
-		o.Router = r
-	}
-}
-
-// Wait tells the server to wait for requests to finish before exiting
-// If `wg` is nil, server only wait for completion of rpc handler.
-// For user need finer grained control, pass a concrete `wg` here, server will
-// wait against it on stop.
 func Wait(wg *sync.WaitGroup) Option {
 	return func(o *Options) {
 		if o.Context == nil {

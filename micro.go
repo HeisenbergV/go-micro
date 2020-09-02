@@ -101,7 +101,7 @@ func NewFunction(opts ...Option) Function {
 // NewEvent creates a new event publisher
 func NewEvent(topic string, c client.Client) Event {
 	if c == nil {
-		c = client.NewClient()
+		return nil
 	}
 	return &event{c, topic}
 }

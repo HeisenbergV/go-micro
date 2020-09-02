@@ -10,33 +10,20 @@ import (
 )
 
 type Options struct {
-	// Used to select codec
 	ContentType string
 
-	// Plugged interfaces
 	Broker    broker.Broker
 	Codecs    map[string]codec.NewCodec
 	Transport transport.Transport
 
-	// Router sets the router
 	Router Router
 
-	// Connection Pool
 	PoolSize int
 	PoolTTL  time.Duration
 
-	// Response cache
-	Cache *Cache
-
-	// Middleware for client
-	Wrappers []Wrapper
-
-	// Default Call Options
+	Wrappers    []Wrapper
 	CallOptions CallOptions
-
-	// Other options for implementations of the interface
-	// can be stored in a context
-	Context context.Context
+	Context     context.Context
 }
 
 type CallOptions struct {
@@ -54,16 +41,8 @@ type CallOptions struct {
 	RequestTimeout time.Duration
 	// Stream timeout for the stream
 	StreamTimeout time.Duration
-	// Use the services own auth token
-	ServiceToken bool
-	// Duration to cache the response for
-	CacheExpiry time.Duration
+	CallWrappers  []CallWrapper
 
-	// Middleware for low level call func
-	CallWrappers []CallWrapper
-
-	// Other options for implementations of the interface
-	// can be stored in a context
 	Context context.Context
 }
 
@@ -90,7 +69,6 @@ type RequestOptions struct {
 
 func NewOptions(options ...Option) Options {
 	opts := Options{
-		Cache:       NewCache(),
 		Context:     context.Background(),
 		ContentType: DefaultContentType,
 		Codecs:      make(map[string]codec.NewCodec),
@@ -215,8 +193,6 @@ func DialTimeout(d time.Duration) Option {
 	}
 }
 
-// Call Options
-
 // WithExchange sets the exchange to route a message through
 func WithExchange(e string) PublishOption {
 	return func(o *PublishOptions) {
@@ -297,14 +273,6 @@ func WithDialTimeout(d time.Duration) CallOption {
 func WithServiceToken() CallOption {
 	return func(o *CallOptions) {
 		o.ServiceToken = true
-	}
-}
-
-// WithCache is a CallOption which sets the duration the response
-// shoull be cached for
-func WithCache(c time.Duration) CallOption {
-	return func(o *CallOptions) {
-		o.CacheExpiry = c
 	}
 }
 

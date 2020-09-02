@@ -3,7 +3,6 @@ package micro
 import (
 	"context"
 
-	"github.com/micro/cli/v2"
 	"github.com/micro/go-micro/v2/broker"
 	"github.com/micro/go-micro/v2/client"
 	"github.com/micro/go-micro/v2/config"
@@ -136,24 +135,6 @@ func Metadata(md map[string]string) Option {
 		o.Server.Init(server.Metadata(md))
 	}
 }
-
-// Flags that can be passed to service
-func Flags(flags ...cli.Flag) Option {
-	return func(o *Options) {
-		o.Cmd.App().Flags = append(o.Cmd.App().Flags, flags...)
-	}
-}
-
-// Action can be used to parse user provided cli options
-func Action(a func(*cli.Context) error) Option {
-	return func(o *Options) {
-		o.Cmd.App().Action = a
-	}
-}
-
-// WrapClient is a convenience method for wrapping a Client with
-// some middleware component. A list of wrappers can be provided.
-// Wrappers are applied in reverse order so the last is executed first.
 func WrapClient(w ...client.Wrapper) Option {
 	return func(o *Options) {
 		// apply in reverse

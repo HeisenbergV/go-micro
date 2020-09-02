@@ -25,14 +25,7 @@ func newService(opts ...Option) Service {
 	// service name
 	serviceName := options.Server.Options().Name
 
-	// we pass functions to the wrappers since the values can change during initialisation
-	cacheFn := func() *client.Cache { return options.Client.Options().Cache }
-
-	// wrap client to inject From-Service header on any calls
 	options.Client = wrapper.FromService(serviceName, options.Client)
-	options.Client = wrapper.CacheClient(cacheFn, options.Client)
-
-	// set opts
 	service.opts = options
 
 	return service
