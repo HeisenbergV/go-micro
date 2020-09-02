@@ -2,41 +2,24 @@ package broker
 
 import (
 	"context"
-	"crypto/tls"
 
 	"github.com/micro/go-micro/v2/codec"
 )
 
 type Options struct {
-	Addrs  []string
-	Secure bool
-	Codec  codec.Marshaler
-
-	// Handler executed when error happens in broker mesage
-	// processing
+	Addrs        []string
+	Codec        codec.Marshaler
 	ErrorHandler Handler
-
-	TLSConfig *tls.Config
-	Context   context.Context
+	Context      context.Context
 }
 
 type PublishOptions struct {
-	// Other options for implementations of the interface
-	// can be stored in a context
 	Context context.Context
 }
 
 type SubscribeOptions struct {
-	// AutoAck defaults to true. When a handler returns
-	// with a nil error the message is acked.
 	AutoAck bool
-	// Subscribers with the same queue name
-	// will create a shared subscription where each
-	// receives a subset of messages.
-	Queue string
-
-	// Other options for implementations of the interface
-	// can be stored in a context
+	Queue   string
 	Context context.Context
 }
 
@@ -44,7 +27,6 @@ type Option func(*Options)
 
 type PublishOption func(*PublishOptions)
 
-// PublishContext set context
 func PublishContext(ctx context.Context) PublishOption {
 	return func(o *PublishOptions) {
 		o.Context = ctx
@@ -100,20 +82,6 @@ func ErrorHandler(h Handler) Option {
 func Queue(name string) SubscribeOption {
 	return func(o *SubscribeOptions) {
 		o.Queue = name
-	}
-}
-
-// Secure communication with the broker
-func Secure(b bool) Option {
-	return func(o *Options) {
-		o.Secure = b
-	}
-}
-
-// Specify TLS Config
-func TLSConfig(t *tls.Config) Option {
-	return func(o *Options) {
-		o.TLSConfig = t
 	}
 }
 
