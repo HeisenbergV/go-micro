@@ -18,15 +18,8 @@ type Server interface {
 	Handle(Handler) error
 	// Create a new handler
 	NewHandler(interface{}, ...HandlerOption) Handler
-	// Create a new subscriber
-	NewSubscriber(string, interface{}, ...SubscriberOption) Subscriber
-	// Register a subscriber
-	Subscribe(Subscriber) error
-	// Start the server
 	Start() error
-	// Stop the server
 	Stop() error
-	// Server implementation
 	String() string
 }
 

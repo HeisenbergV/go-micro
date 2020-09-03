@@ -6,13 +6,11 @@ import (
 
 	"github.com/micro/go-micro/v2/broker"
 	"github.com/micro/go-micro/v2/codec"
-	"github.com/micro/go-micro/v2/transport"
 )
 
 type Options struct {
 	Codecs       map[string]codec.NewCodec
 	Broker       broker.Broker
-	Transport    transport.Transport
 	Metadata     map[string]string
 	Name         string
 	Address      string
@@ -32,14 +30,6 @@ func newOptions(opt ...Option) Options {
 
 	for _, o := range opt {
 		o(&opts)
-	}
-
-	if opts.Broker == nil {
-		opts.Broker = broker.DefaultBroker
-	}
-
-	if opts.Transport == nil {
-		opts.Transport = transport.DefaultTransport
 	}
 
 	if len(opts.Address) == 0 {
@@ -116,13 +106,6 @@ func Codec(contentType string, c codec.NewCodec) Option {
 func Context(ctx context.Context) Option {
 	return func(o *Options) {
 		o.Context = ctx
-	}
-}
-
-// Transport mechanism for communication e.g http, rabbitmq, etc
-func Transport(t transport.Transport) Option {
-	return func(o *Options) {
-		o.Transport = t
 	}
 }
 

@@ -7,25 +7,19 @@ import (
 	"github.com/micro/go-micro/v2/client"
 	"github.com/micro/go-micro/v2/config"
 	"github.com/micro/go-micro/v2/server"
-	"github.com/micro/go-micro/v2/transport"
 )
 
-// Options for micro service
 type Options struct {
-	Broker    broker.Broker
-	Config    config.Config
-	Client    client.Client
-	Server    server.Server
-	Transport transport.Transport
+	Broker broker.Broker
+	Config config.Config
+	Client client.Client
+	Server server.Server
 
-	// Before and After funcs
 	BeforeStart []func() error
 	BeforeStop  []func() error
 	AfterStart  []func() error
 	AfterStop   []func() error
 
-	// Other options for implementations of the interface
-	// can be stored in a context
 	Context context.Context
 
 	Signal bool
@@ -33,11 +27,10 @@ type Options struct {
 
 func newOptions(opts ...Option) Options {
 	opt := Options{
-		Config:    config.DefaultConfig,
-		Transport: transport.DefaultTransport,
-		Server:    server.DefaultServer,
-		Context:   context.Background(),
-		Signal:    true,
+		Config:  config.DefaultConfig,
+		Server:  server.DefaultServer,
+		Context: context.Background(),
+		Signal:  true,
 	}
 
 	for _, o := range opts {
@@ -92,17 +85,6 @@ func Server(s server.Server) Option {
 func Config(c config.Config) Option {
 	return func(o *Options) {
 		o.Config = c
-	}
-}
-
-// Transport sets the transport for the service
-// and the underlying components
-func Transport(t transport.Transport) Option {
-	return func(o *Options) {
-		o.Transport = t
-		// Update Client and Server
-		o.Client.Init(client.Transport(t))
-		o.Server.Init(server.Transport(t))
 	}
 }
 

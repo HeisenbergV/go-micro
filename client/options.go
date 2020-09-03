@@ -6,15 +6,13 @@ import (
 
 	"github.com/micro/go-micro/v2/broker"
 	"github.com/micro/go-micro/v2/codec"
-	"github.com/micro/go-micro/v2/transport"
 )
 
 type Options struct {
 	ContentType string
 
-	Broker    broker.Broker
-	Codecs    map[string]codec.NewCodec
-	Transport transport.Transport
+	Broker broker.Broker
+	Codecs map[string]codec.NewCodec
 
 	Router Router
 
@@ -27,22 +25,13 @@ type Options struct {
 }
 
 type CallOptions struct {
-	// Address of remote hosts
-	Address []string
-	// Backoff func
-	Backoff BackoffFunc
-	// Check if retriable func
-	Retry RetryFunc
-	// Transport Dial Timeout
-	DialTimeout time.Duration
-	// Number of Call attempts
-	Retries int
-	// Request/Response timeout
+	Address        []string
+	Backoff        BackoffFunc
+	Retries        int
 	RequestTimeout time.Duration
-	// Stream timeout for the stream
-	StreamTimeout time.Duration
-	CallWrappers  []CallWrapper
-	Context       context.Context
+	StreamTimeout  time.Duration
+	CallWrappers   []CallWrapper
+	Context        context.Context
 }
 
 type PublishOptions struct {
@@ -73,15 +62,12 @@ func NewOptions(options ...Option) Options {
 		Codecs:      make(map[string]codec.NewCodec),
 		CallOptions: CallOptions{
 			Backoff:        DefaultBackoff,
-			Retry:          DefaultRetry,
 			Retries:        DefaultRetries,
 			RequestTimeout: DefaultRequestTimeout,
-			DialTimeout:    transport.DefaultDialTimeout,
 		},
-		PoolSize:  DefaultPoolSize,
-		PoolTTL:   DefaultPoolTTL,
-		Broker:    broker.DefaultBroker,
-		Transport: transport.DefaultTransport,
+		PoolSize: DefaultPoolSize,
+		PoolTTL:  DefaultPoolTTL,
+		Broker:   broker.DefaultBroker,
 	}
 
 	for _, o := range options {
@@ -126,13 +112,6 @@ func PoolTTL(d time.Duration) Option {
 	}
 }
 
-// Transport to use for communication e.g http, rabbitmq, etc
-func Transport(t transport.Transport) Option {
-	return func(o *Options) {
-		o.Transport = t
-	}
-}
-
 // Adds a Wrapper to a list of options passed into the client
 func Wrap(w Wrapper) Option {
 	return func(o *Options) {
@@ -163,13 +142,6 @@ func Retries(i int) Option {
 	}
 }
 
-// Retry sets the retry function to be used when re-trying.
-func Retry(fn RetryFunc) Option {
-	return func(o *Options) {
-		o.CallOptions.Retry = fn
-	}
-}
-
 // The request timeout.
 // Should this be a Call Option?
 func RequestTimeout(d time.Duration) Option {
@@ -182,13 +154,6 @@ func RequestTimeout(d time.Duration) Option {
 func StreamTimeout(d time.Duration) Option {
 	return func(o *Options) {
 		o.CallOptions.StreamTimeout = d
-	}
-}
-
-// Transport dial timeout
-func DialTimeout(d time.Duration) Option {
-	return func(o *Options) {
-		o.CallOptions.DialTimeout = d
 	}
 }
 
@@ -228,16 +193,6 @@ func WithBackoff(fn BackoffFunc) CallOption {
 	}
 }
 
-// WithRetry is a CallOption which overrides that which
-// set in Options.CallOptions
-func WithRetry(fn RetryFunc) CallOption {
-	return func(o *CallOptions) {
-		o.Retry = fn
-	}
-}
-
-// WithRetries is a CallOption which overrides that which
-// set in Options.CallOptions
 func WithRetries(i int) CallOption {
 	return func(o *CallOptions) {
 		o.Retries = i
@@ -259,29 +214,11 @@ func WithStreamTimeout(d time.Duration) CallOption {
 	}
 }
 
-// WithDialTimeout is a CallOption which overrides that which
-// set in Options.CallOptions
-func WithDialTimeout(d time.Duration) CallOption {
-	return func(o *CallOptions) {
-		o.DialTimeout = d
-	}
-}
-
-// WithServiceToken is a CallOption which overrides the
-// authorization header with the services own auth token
-func WithServiceToken() CallOption {
-	return func(o *CallOptions) {
-		o.ServiceToken = true
-	}
-}
-
 func WithMessageContentType(ct string) MessageOption {
 	return func(o *MessageOptions) {
 		o.ContentType = ct
 	}
 }
-
-// Request Options
 
 func WithContentType(ct string) RequestOption {
 	return func(o *RequestOptions) {
@@ -292,12 +229,5 @@ func WithContentType(ct string) RequestOption {
 func StreamingRequest() RequestOption {
 	return func(o *RequestOptions) {
 		o.Stream = true
-	}
-}
-
-// WithRouter sets the client router
-func WithRouter(r Router) Option {
-	return func(o *Options) {
-		o.Router = r
 	}
 }

@@ -24,6 +24,7 @@ require (
 	github.com/fsnotify/fsnotify v1.4.7
 	github.com/fsouza/go-dockerclient v1.6.0
 	github.com/ghodss/yaml v1.0.0
+	github.com/gin-gonic/gin v1.6.3
 	github.com/go-acme/lego/v3 v3.4.0
 	github.com/go-git/go-git/v5 v5.1.0
 	github.com/go-telegram-bot-api/telegram-bot-api v4.6.4+incompatible // indirect
