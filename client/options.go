@@ -4,55 +4,22 @@ import (
 	"context"
 	"time"
 
+	"github.com/micro/go-micro/client/selector"
 	"github.com/micro/go-micro/v2/broker"
 	"github.com/micro/go-micro/v2/codec"
 )
 
 type Options struct {
-	ContentType string
-
-	Broker broker.Broker
-	Codecs map[string]codec.NewCodec
-
-	Router Router
-
-	PoolSize int
-	PoolTTL  time.Duration
-
-	Wrappers    []Wrapper
-	CallOptions CallOptions
-	Context     context.Context
-}
-
-type CallOptions struct {
-	Address        []string
-	Backoff        BackoffFunc
-	Retries        int
-	RequestTimeout time.Duration
-	StreamTimeout  time.Duration
-	CallWrappers   []CallWrapper
-	Context        context.Context
-}
-
-type PublishOptions struct {
-	// Exchange is the routing exchange for the message
-	Exchange string
-	// Other options for implementations of the interface
-	// can be stored in a context
-	Context context.Context
-}
-
-type MessageOptions struct {
-	ContentType string
-}
-
-type RequestOptions struct {
-	ContentType string
-	Stream      bool
-
-	// Other options for implementations of the interface
-	// can be stored in a context
-	Context context.Context
+	Address      string
+	ContentType  string
+	UsePool      bool
+	PoolInitNum  int
+	PoolCapacity int
+	PoolTTL      time.Duration
+	Wrappers     []Wrapper
+	CallOptions  CallOptions
+	Context      context.Context
+	Broker       broker.Broker
 }
 
 func NewOptions(options ...Option) Options {
@@ -77,7 +44,39 @@ func NewOptions(options ...Option) Options {
 	return opts
 }
 
-// Broker to be used for pub/sub
+type PublishOptions struct {
+	// Exchange is the routing exchange for the message
+	Exchange string
+	// Other options for implementations of the interface
+	// can be stored in a context
+	Context context.Context
+}
+
+type MessageOptions struct {
+	ContentType string
+}
+
+type RequestOptions struct {
+	ContentType string
+	Stream      bool
+
+	// Other options for implementations of the interface
+	// can be stored in a context
+	Context context.Context
+}
+
+type CallOptions struct {
+	// 重试次数
+	Retries int
+	// 请求超时
+	RequestTimeout time.Duration
+	//建立连接超时
+	DialTimeout time.Duration
+	// 中间件
+	CallWrappers []CallWrapper
+	Context      context.Context
+}
+
 func Broker(b broker.Broker) Option {
 	return func(o *Options) {
 		o.Broker = b
@@ -111,8 +110,6 @@ func PoolTTL(d time.Duration) Option {
 		o.PoolTTL = d
 	}
 }
-
-// Adds a Wrapper to a list of options passed into the client
 func Wrap(w Wrapper) Option {
 	return func(o *Options) {
 		o.Wrappers = append(o.Wrappers, w)
@@ -142,22 +139,12 @@ func Retries(i int) Option {
 	}
 }
 
-// The request timeout.
 // Should this be a Call Option?
 func RequestTimeout(d time.Duration) Option {
 	return func(o *Options) {
 		o.CallOptions.RequestTimeout = d
 	}
 }
-
-// StreamTimeout sets the stream timeout
-func StreamTimeout(d time.Duration) Option {
-	return func(o *Options) {
-		o.CallOptions.StreamTimeout = d
-	}
-}
-
-// WithExchange sets the exchange to route a message through
 func WithExchange(e string) PublishOption {
 	return func(o *PublishOptions) {
 		o.Exchange = e
@@ -178,6 +165,12 @@ func WithAddress(a ...string) CallOption {
 	}
 }
 
+func WithSelectOption(so ...selector.SelectOption) CallOption {
+	return func(o *CallOptions) {
+		o.SelectOptions = append(o.SelectOptions, so...)
+	}
+}
+
 // WithCallWrapper is a CallOption which adds to the existing CallFunc wrappers
 func WithCallWrapper(cw ...CallWrapper) CallOption {
 	return func(o *CallOptions) {
@@ -192,25 +185,9 @@ func WithBackoff(fn BackoffFunc) CallOption {
 		o.Backoff = fn
 	}
 }
-
 func WithRetries(i int) CallOption {
 	return func(o *CallOptions) {
 		o.Retries = i
-	}
-}
-
-// WithRequestTimeout is a CallOption which overrides that which
-// set in Options.CallOptions
-func WithRequestTimeout(d time.Duration) CallOption {
-	return func(o *CallOptions) {
-		o.RequestTimeout = d
-	}
-}
-
-// WithStreamTimeout sets the stream timeout
-func WithStreamTimeout(d time.Duration) CallOption {
-	return func(o *CallOptions) {
-		o.StreamTimeout = d
 	}
 }
 
@@ -226,8 +203,9 @@ func WithContentType(ct string) RequestOption {
 	}
 }
 
-func StreamingRequest() RequestOption {
-	return func(o *RequestOptions) {
-		o.Stream = true
+// WithRouter sets the client router
+func WithRouter(r Router) Option {
+	return func(o *Options) {
+		o.Router = r
 	}
 }

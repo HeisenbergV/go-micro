@@ -1,8 +1,7 @@
 package http
 
 import (
-	"github.com/micro/go-micro/v2/client"
-	"github.com/micro/go-micro/v2/codec"
+	"trading-system-proxy/core/client"
 )
 
 type httpRequest struct {
@@ -10,25 +9,14 @@ type httpRequest struct {
 	method      string
 	contentType string
 	request     interface{}
-	opts        client.RequestOptions
 }
 
-func newHTTPRequest(service, method string, request interface{}, contentType string, reqOpts ...client.RequestOption) client.Request {
-	var opts client.RequestOptions
-	for _, o := range reqOpts {
-		o(&opts)
-	}
-
-	if len(opts.ContentType) > 0 {
-		contentType = opts.ContentType
-	}
-
+func newHTTPRequest(service, method string, request interface{}, contentType string) client.Request {
 	return &httpRequest{
 		service:     service,
 		method:      method,
 		request:     request,
 		contentType: contentType,
-		opts:        opts,
 	}
 }
 
@@ -48,14 +36,6 @@ func (h *httpRequest) Endpoint() string {
 	return h.method
 }
 
-func (h *httpRequest) Codec() codec.Writer {
-	return nil
-}
-
 func (h *httpRequest) Body() interface{} {
 	return h.request
-}
-
-func (h *httpRequest) Stream() bool {
-	return h.opts.Stream
 }
