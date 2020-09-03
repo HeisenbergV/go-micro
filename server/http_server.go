@@ -1,11 +1,11 @@
 package server
 
 import (
+	"context"
 	"errors"
 	"fmt"
-	"net"
 	"net/http"
-	"sync"
+	"time"
 
 	"core/codec"
 	"core/codec/jsonrpc"
@@ -23,11 +23,8 @@ var (
 )
 
 type httpServer struct {
-	sync.Mutex
-	opts         Options
-	hd           Handler
-	exit         chan chan error
-	registerOnce sync.Once
+	opts Options
+	http *http.Server
 }
 
 func (h *httpServer) newCodec(contentType string) (codec.NewCodec, error) {
@@ -41,18 +38,17 @@ func (h *httpServer) newCodec(contentType string) (codec.NewCodec, error) {
 }
 
 func (h *httpServer) Options() Options {
-	h.Lock()
 	opts := h.opts
-	h.Unlock()
 	return opts
 }
 
 func (h *httpServer) Init(opts ...Option) error {
-	h.Lock()
 	for _, o := range opts {
 		o(&h.opts)
 	}
-	h.Unlock()
+
+	h.http = &http.Server{}
+	h.http.Addr = h.opts.Address
 	return nil
 }
 
@@ -60,9 +56,8 @@ func (h *httpServer) Handle(handler Handler) error {
 	if _, ok := handler.Handler().(http.Handler); !ok {
 		return errors.New("Handle requires http.Handler")
 	}
-	h.Lock()
-	h.hd = handler
-	h.Unlock()
+
+	h.http.Handler = handler.Handler().(http.Handler)
 	return nil
 }
 
@@ -82,34 +77,16 @@ func (h *httpServer) NewHandler(handler interface{}, opts ...HandlerOption) Hand
 }
 
 func (h *httpServer) Start() error {
-	h.Lock()
-	opts := h.opts
-	hd := h.hd
-	h.Unlock()
 
-	ln, err := net.Listen("tcp", opts.Address)
-	if err != nil {
-		return err
-	}
-
-	h.Lock()
-	h.opts.Address = ln.Addr().String()
-	h.Unlock()
-
-	handler, ok := hd.Handler().(http.Handler)
-	if !ok {
-		return errors.New("Server required http.Handler")
-	}
-
-	go http.Serve(ln, handler)
+	go h.http.ListenAndServe()
 
 	return nil
 }
 
 func (h *httpServer) Stop() error {
-	ch := make(chan error)
-	h.exit <- ch
-	return <-ch
+	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+	defer cancel()
+	return h.http.Shutdown(ctx)
 }
 
 func (h *httpServer) String() string {
@@ -119,6 +96,5 @@ func (h *httpServer) String() string {
 func newHttpServer(opts ...Option) Server {
 	return &httpServer{
 		opts: newOptions(opts...),
-		exit: make(chan chan error),
 	}
 }
