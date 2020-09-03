@@ -45,7 +45,7 @@ func (h *httpClient) Init(opts ...client.Option) error {
 	return nil
 }
 
-func (h *httpClient) NewRequest(service, method string, req interface{}) client.Request {
+func (h *httpClient) NewRequest(service, method string, req interface{}, reqOpts ...client.RequestOption) client.Request {
 	return newHTTPRequest(service, method, req, h.opts.ContentType)
 }
 
@@ -105,21 +105,31 @@ func (h *httpClient) String() string {
 	return "http"
 }
 
-func newClient(opts client.Options) client.Client {
-	opts.ContentType = "application/json"
+func (r *httpClient) Options() client.Options {
+	return r.opts
+}
+
+func (r *httpClient) Publish(ctx context.Context, msg client.Message, opts ...client.PublishOption) error {
+	return nil
+}
+
+func newHttpClient(opts ...client.Option) client.Client {
+	opt := client.NewOptions(opts...)
+
 	hc := &httpClient{
-		opts: opts,
+		opts: opt,
 		hs:   gorequest.New(),
 	}
+
 	c := client.Client(hc)
 
-	for i := len(opts.Wrappers); i > 0; i-- {
-		c = opts.Wrappers[i-1](c)
+	for i := len(opt.Wrappers); i > 0; i-- {
+		c = opt.Wrappers[i-1](c)
 	}
 
 	return c
 }
 
-func NewClient(opts client.Options) client.Client {
-	return newClient(opts)
+func NewHttpClient(opts ...client.Option) client.Client {
+	return newHttpClient(opts...)
 }

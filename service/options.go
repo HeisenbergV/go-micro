@@ -2,19 +2,16 @@ package service
 
 import (
 	"context"
-	"time"
 
 	"github.com/micro/go-micro/v2/broker"
 	"github.com/micro/go-micro/v2/client"
 	"github.com/micro/go-micro/v2/server"
-	"github.com/micro/go-micro/v2/transport"
 )
 
 type Options struct {
-	Broker    broker.Broker
-	Client    client.Client
-	Server    server.Server
-	Transport transport.Transport
+	Broker broker.Broker
+	Client client.Client
+	Server server.Server
 
 	// Before and After funcs
 	BeforeStart []func() error
@@ -31,11 +28,10 @@ type Option func(*Options)
 
 func NewOptions(opts ...Option) Options {
 	opt := Options{
-		Broker:    broker.DefaultBroker,
-		Client:    client.DefaultClient,
-		Server:    server.DefaultServer,
-		Transport: transport.DefaultTransport,
-		Context:   context.Background(),
+		Broker:  broker.DefaultBroker,
+		Client:  client.DefaultClient,
+		Server:  server.DefaultServer,
+		Context: context.Background(),
 	}
 
 	for _, o := range opts {
@@ -75,20 +71,6 @@ func Server(s server.Server) Option {
 	}
 }
 
-// Transport sets the transport for the service
-// and the underlying components
-func Transport(t transport.Transport) Option {
-	return func(o *Options) {
-		o.Transport = t
-		// Update Client and Server
-		o.Client.Init(client.Transport(t))
-		o.Server.Init(server.Transport(t))
-	}
-}
-
-// Convenience options
-
-// Address sets the address of the server
 func Address(addr string) Option {
 	return func(o *Options) {
 		o.Server.Init(server.Address(addr))
@@ -116,23 +98,6 @@ func Metadata(md map[string]string) Option {
 	}
 }
 
-// RegisterTTL specifies the TTL to use when registering the service
-func RegisterTTL(t time.Duration) Option {
-	return func(o *Options) {
-		o.Server.Init(server.RegisterTTL(t))
-	}
-}
-
-// RegisterInterval specifies the interval on which to re-register
-func RegisterInterval(t time.Duration) Option {
-	return func(o *Options) {
-		o.Server.Init(server.RegisterInterval(t))
-	}
-}
-
-// WrapClient is a convenience method for wrapping a Client with
-// some middleware component. A list of wrappers can be provided.
-// Wrappers are applied in reverse order so the last is executed first.
 func WrapClient(w ...client.Wrapper) Option {
 	return func(o *Options) {
 		// apply in reverse
@@ -142,14 +107,12 @@ func WrapClient(w ...client.Wrapper) Option {
 	}
 }
 
-// WrapCall is a convenience method for wrapping a Client CallFunc
 func WrapCall(w ...client.CallWrapper) Option {
 	return func(o *Options) {
 		o.Client.Init(client.WrapCall(w...))
 	}
 }
 
-// WrapHandler adds a handler Wrapper to a list of options passed into the server
 func WrapHandler(w ...server.HandlerWrapper) Option {
 	return func(o *Options) {
 		var wrappers []server.Option
@@ -158,12 +121,10 @@ func WrapHandler(w ...server.HandlerWrapper) Option {
 			wrappers = append(wrappers, server.WrapHandler(wrap))
 		}
 
-		// Init once
 		o.Server.Init(wrappers...)
 	}
 }
 
-// WrapSubscriber adds a subscriber Wrapper to a list of options passed into the server
 func WrapSubscriber(w ...server.SubscriberWrapper) Option {
 	return func(o *Options) {
 		var wrappers []server.Option
@@ -176,8 +137,6 @@ func WrapSubscriber(w ...server.SubscriberWrapper) Option {
 		o.Server.Init(wrappers...)
 	}
 }
-
-// Before and Afters
 
 func BeforeStart(fn func() error) Option {
 	return func(o *Options) {

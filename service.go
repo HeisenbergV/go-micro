@@ -32,11 +32,7 @@ func (s *service) Name() string {
 	return s.opts.Server.Options().Name
 }
 
-// Init initialises options. Additionally it calls cmd.Init
-// which parses command line flags. cmd.Init is only called
-// on first Init.
 func (s *service) Init(opts ...Option) {
-	// process options
 	for _, o := range opts {
 		o(&s.opts)
 	}

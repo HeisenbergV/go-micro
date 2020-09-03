@@ -4,7 +4,6 @@ import (
 	"context"
 	"time"
 
-	"github.com/micro/go-micro/client/selector"
 	"github.com/micro/go-micro/v2/broker"
 	"github.com/micro/go-micro/v2/codec"
 )
@@ -19,7 +18,9 @@ type Options struct {
 	Wrappers     []Wrapper
 	CallOptions  CallOptions
 	Context      context.Context
-	Broker       broker.Broker
+	Codecs       map[string]codec.NewCodec
+
+	Broker broker.Broker
 }
 
 func NewOptions(options ...Option) Options {
@@ -28,13 +29,13 @@ func NewOptions(options ...Option) Options {
 		ContentType: DefaultContentType,
 		Codecs:      make(map[string]codec.NewCodec),
 		CallOptions: CallOptions{
-			Backoff:        DefaultBackoff,
 			Retries:        DefaultRetries,
 			RequestTimeout: DefaultRequestTimeout,
 		},
-		PoolSize: DefaultPoolSize,
-		PoolTTL:  DefaultPoolTTL,
-		Broker:   broker.DefaultBroker,
+		PoolInitNum:  5,
+		PoolCapacity: 20,
+		PoolTTL:      DefaultPoolTTL,
+		Broker:       broker.DefaultBroker,
 	}
 
 	for _, o := range options {
@@ -70,6 +71,7 @@ type CallOptions struct {
 	Retries int
 	// 请求超时
 	RequestTimeout time.Duration
+	Address        string
 	//建立连接超时
 	DialTimeout time.Duration
 	// 中间件
@@ -97,13 +99,6 @@ func ContentType(ct string) Option {
 	}
 }
 
-// PoolSize sets the connection pool size
-func PoolSize(d int) Option {
-	return func(o *Options) {
-		o.PoolSize = d
-	}
-}
-
 // PoolTTL sets the connection pool ttl
 func PoolTTL(d time.Duration) Option {
 	return func(o *Options) {
@@ -120,14 +115,6 @@ func Wrap(w Wrapper) Option {
 func WrapCall(cw ...CallWrapper) Option {
 	return func(o *Options) {
 		o.CallOptions.CallWrappers = append(o.CallOptions.CallWrappers, cw...)
-	}
-}
-
-// Backoff is used to set the backoff function used
-// when retrying Calls
-func Backoff(fn BackoffFunc) Option {
-	return func(o *Options) {
-		o.CallOptions.Backoff = fn
 	}
 }
 
@@ -159,15 +146,9 @@ func PublishContext(ctx context.Context) PublishOption {
 }
 
 // WithAddress sets the remote addresses to use rather than using service discovery
-func WithAddress(a ...string) CallOption {
+func WithAddress(a string) CallOption {
 	return func(o *CallOptions) {
 		o.Address = a
-	}
-}
-
-func WithSelectOption(so ...selector.SelectOption) CallOption {
-	return func(o *CallOptions) {
-		o.SelectOptions = append(o.SelectOptions, so...)
 	}
 }
 
@@ -178,13 +159,6 @@ func WithCallWrapper(cw ...CallWrapper) CallOption {
 	}
 }
 
-// WithBackoff is a CallOption which overrides that which
-// set in Options.CallOptions
-func WithBackoff(fn BackoffFunc) CallOption {
-	return func(o *CallOptions) {
-		o.Backoff = fn
-	}
-}
 func WithRetries(i int) CallOption {
 	return func(o *CallOptions) {
 		o.Retries = i
@@ -200,12 +174,5 @@ func WithMessageContentType(ct string) MessageOption {
 func WithContentType(ct string) RequestOption {
 	return func(o *RequestOptions) {
 		o.ContentType = ct
-	}
-}
-
-// WithRouter sets the client router
-func WithRouter(r Router) Option {
-	return func(o *Options) {
-		o.Router = r
 	}
 }

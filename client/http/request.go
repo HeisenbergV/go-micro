@@ -1,8 +1,6 @@
 package http
 
-import (
-	"trading-system-proxy/core/client"
-)
+import "github.com/micro/go-micro/v2/client"
 
 type httpRequest struct {
 	service     string

@@ -82,7 +82,11 @@ func (g *grpcClient) Init(opts ...Option) error {
 	return nil
 }
 
-func (g *grpcClient) NewRequest(service, method string, req interface{}) Request {
+func (r *grpcClient) Options() Options {
+	return r.opts
+}
+
+func (g *grpcClient) NewRequest(service, method string, req interface{}, reqOpts ...RequestOption) Request {
 	return newGRPCRequest(service, method, req, g.opts.ContentType)
 }
 
@@ -147,35 +151,40 @@ func (g *grpcClient) Call(ctx context.Context, req Request, rsp interface{}, opt
 	return gerr
 }
 
+func (r *grpcClient) Publish(ctx context.Context, msg Message, opts ...PublishOption) error {
+	return nil
+}
+
 func (g *grpcClient) String() string {
 	return "grpc"
 }
 
-func newRpcClient(opts Options) Client {
-	opts.ContentType = "application/grpc+proto"
-	rc := &grpcClient{
-		opts: opts,
-	}
+func newRpcClient(opts ...Option) Client {
+	opt := NewOptions(opts...)
 
 	pool, err := NewPool(
 		func() (*grpc.ClientConn, error) {
-			return grpc.Dial(opts.Address, grpc.WithInsecure())
-		}, opts.PoolInitNum, opts.PoolCapacity, opts.PoolTTL, 0)
+			return grpc.Dial(opt.Address, grpc.WithInsecure())
+		}, opt.PoolInitNum, opt.PoolCapacity, opt.PoolTTL, 0)
 
 	if err != nil {
 		return nil
 	}
 
+	rc := &grpcClient{
+		opts: opt,
+	}
+
 	rc.pool = pool
 	c := Client(rc)
 
-	for i := len(opts.Wrappers); i > 0; i-- {
-		c = opts.Wrappers[i-1](c)
+	for i := len(opt.Wrappers); i > 0; i-- {
+		c = opt.Wrappers[i-1](c)
 	}
 
 	return c
 }
 
-func NewRpcClient(opts Options) Client {
-	return newRpcClient(opts)
+func NewRpcClient(opts ...Option) Client {
+	return newRpcClient(opts...)
 }
