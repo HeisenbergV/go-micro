@@ -6,7 +6,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/micro/go-micro/v2/client"
+	"core/client"
+
 	"github.com/parnurzeal/gorequest"
 )
 

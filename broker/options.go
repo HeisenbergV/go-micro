@@ -3,7 +3,7 @@ package broker
 import (
 	"context"
 
-	"github.com/micro/go-micro/v2/codec"
+	"core/codec"
 )
 
 type Options struct {

@@ -1,6 +1,6 @@
 package http
 
-import "github.com/micro/go-micro/v2/client"
+import "core/client"
 
 type httpRequest struct {
 	service     string

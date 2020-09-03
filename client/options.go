@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/micro/go-micro/v2/broker"
-	"github.com/micro/go-micro/v2/codec"
+	"core/broker"
+	"core/codec"
 )
 
 type Options struct {

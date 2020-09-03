@@ -3,9 +3,9 @@ package service
 import (
 	"context"
 
-	"github.com/micro/go-micro/v2/broker"
-	"github.com/micro/go-micro/v2/client"
-	"github.com/micro/go-micro/v2/server"
+	"core/broker"
+	"core/client"
+	"core/server"
 )
 
 type Options struct {

@@ -4,8 +4,9 @@ package server
 import (
 	"context"
 
+	"core/codec"
+
 	"github.com/google/uuid"
-	"github.com/micro/go-micro/v2/codec"
 )
 
 // Server is a simple micro server abstraction

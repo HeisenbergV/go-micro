@@ -5,11 +5,9 @@ import (
 	"os/signal"
 	"sync"
 
-	"github.com/micro/go-micro/v2/client"
-	"github.com/micro/go-micro/v2/logger"
-	"github.com/micro/go-micro/v2/server"
-	signalutil "github.com/micro/go-micro/v2/util/signal"
-	"github.com/micro/go-micro/v2/util/wrapper"
+	"core/client"
+	"core/server"
+	signalutil "core/util/signal"
 )
 
 type service struct {
@@ -22,7 +20,6 @@ func newService(opts ...Option) Service {
 	service := new(service)
 	options := newOptions(opts...)
 
-	options.Client = wrapper.FromService(options.Server.Options().Name, options.Client)
 	service.opts = options
 
 	return service
@@ -97,11 +94,6 @@ func (s *service) Stop() error {
 }
 
 func (s *service) Run() error {
-
-	if logger.V(logger.InfoLevel, logger.DefaultLogger) {
-		logger.Infof("Starting [service] %s", s.Name())
-	}
-
 	if err := s.Start(); err != nil {
 		return err
 	}

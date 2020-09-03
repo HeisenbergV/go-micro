@@ -7,9 +7,9 @@ import (
 	"net/http"
 	"sync"
 
-	"github.com/micro/go-micro/v2/codec"
-	"github.com/micro/go-micro/v2/codec/jsonrpc"
-	"github.com/micro/go-micro/v2/codec/protorpc"
+	"core/codec"
+	"core/codec/jsonrpc"
+	"core/codec/protorpc"
 )
 
 var (

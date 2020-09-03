@@ -1,43 +1,53 @@
-// Package log provides a log interface
 package logger
 
-var (
-	// Default logger
-	DefaultLogger Logger = NewHelper(NewLogger())
-)
+import "github.com/sirupsen/logrus"
 
-// Logger is a generic logging interface
 type Logger interface {
-	// Init initialises options
-	Init(options ...Option) error
-	// The Logger options
-	Options() Options
-	// Fields set fields to always be logged
-	Fields(fields map[string]interface{}) Logger
-	// Log writes a log entry
-	Log(level Level, v ...interface{})
-	// Logf writes a formatted log entry
-	Logf(level Level, format string, v ...interface{})
-	// String returns the name of logger
-	String() string
+	Error(args ...interface{})
+	Info(args ...interface{})
+	Debug(args ...interface{})
+
+	Errorf(f string, args ...interface{})
+	Infof(f string, args ...interface{})
+	Debugf(f string, args ...interface{})
+	WithFieldsInfo(fields map[string]interface{}, data string)
+	WithFieldsError(fields map[string]interface{}, data string)
+	WithFieldsDebug(fields map[string]interface{}, data string)
 }
 
-func Init(opts ...Option) error {
-	return DefaultLogger.Init(opts...)
+type loggerWrapper struct {
+	lw *logrus.Logger
 }
 
-func Fields(fields map[string]interface{}) Logger {
-	return DefaultLogger.Fields(fields)
+func (logger *loggerWrapper) WithFieldsInfo(fields map[string]interface{}, data string) {
+	logger.lw.WithFields(logrus.Fields(fields)).Info(data)
 }
 
-func Log(level Level, v ...interface{}) {
-	DefaultLogger.Log(level, v...)
+func (logger *loggerWrapper) WithFieldsError(fields map[string]interface{}, data string) {
+	logger.lw.WithFields(logrus.Fields(fields)).Error(data)
 }
 
-func Logf(level Level, format string, v ...interface{}) {
-	DefaultLogger.Logf(level, format, v...)
+func (logger *loggerWrapper) WithFieldsDebug(fields map[string]interface{}, data string) {
+	logger.lw.WithFields(logrus.Fields(fields)).Debug(data)
 }
 
-func String() string {
-	return DefaultLogger.String()
+func (logger *loggerWrapper) Error(args ...interface{}) {
+	logger.lw.Error(args...)
+}
+
+func (logger *loggerWrapper) Info(args ...interface{}) {
+	logger.lw.Info(args...)
+}
+func (logger *loggerWrapper) Debug(args ...interface{}) {
+	logger.lw.Debug(args...)
+}
+
+func (logger *loggerWrapper) Errorf(f string, args ...interface{}) {
+	logger.lw.Errorf(f, args...)
+}
+func (logger *loggerWrapper) Infof(f string, args ...interface{}) {
+	logger.lw.Infof(f, args...)
+}
+func (logger *loggerWrapper) Debugf(f string, args ...interface{}) {
+	logger.lw.Debugf(f, args...)
 }

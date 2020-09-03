@@ -3,15 +3,13 @@ package micro
 import (
 	"context"
 
-	"github.com/micro/go-micro/v2/broker"
-	"github.com/micro/go-micro/v2/client"
-	"github.com/micro/go-micro/v2/config"
-	"github.com/micro/go-micro/v2/server"
+	"core/broker"
+	"core/client"
+	"core/server"
 )
 
 type Options struct {
 	Broker broker.Broker
-	Config config.Config
 	Client client.Client
 	Server server.Server
 
@@ -27,7 +25,6 @@ type Options struct {
 
 func newOptions(opts ...Option) Options {
 	opt := Options{
-		Config:  config.DefaultConfig,
 		Server:  server.DefaultServer,
 		Context: context.Background(),
 		Signal:  true,
@@ -78,13 +75,6 @@ func HandleSignal(b bool) Option {
 func Server(s server.Server) Option {
 	return func(o *Options) {
 		o.Server = s
-	}
-}
-
-// Config sets the config for the service
-func Config(c config.Config) Option {
-	return func(o *Options) {
-		o.Config = c
 	}
 }
 

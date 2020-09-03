@@ -3,8 +3,9 @@ package server
 import (
 	"testing"
 
+	"core/util/http"
+
 	"github.com/gin-gonic/gin"
-	"github.com/micro/go-micro/v2/util/http"
 )
 
 func TestHTTPServer(t *testing.T) {
